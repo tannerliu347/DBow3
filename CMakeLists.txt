@@ -136,7 +136,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX OR MINGW)
         set(USE_SSE3 OFF CACHE BOOL "Enable SSE3 for GCC")
     endif ()
 
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
+    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall -Wno-deprecated")
 
     if(WARNINGS_ARE_ERRORS)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")

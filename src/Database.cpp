@@ -155,6 +155,20 @@ EntryId Database::add(const BowVector &v,
   return entry_id;
 }
 
+// ---------------------------------------------------------------------------
+
+
+EntryId Database::addImg(const cv::Mat &img,
+    BowVector *bowvec, FeatureVector *fvec) 
+{
+    //extract descriptors
+    cv::Mat dscrptrs;
+    extractDescrp(img, dscrptrs);
+    // call wrapped add function
+    EntryId entry_id = add(dscrptrs, bowvec, fvec);
+    return entry_id;
+}
+
 // --------------------------------------------------------------------------
 
 
@@ -286,6 +300,23 @@ void Database::query(
       break;
   }
 }
+
+
+// --------------------------------------------------------------------------
+
+
+void Database::queryImg(
+  const cv::Mat &img,
+  QueryResults &ret, int max_results, int max_id) const
+{
+    //extract descriptors
+    cv::Mat dscrptrs;
+    extractDescrp(img, dscrptrs);
+    // call wrapped query function
+    query(dscrptrs, ret, max_results, max_id);
+    ret.setDbSize(m_nentries);
+}
+// --------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------
 
@@ -782,6 +813,31 @@ void Database::queryDotProduct(
     ret.resize(max_results);
 
   // these scores cannot be scaled
+}
+
+// ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
+
+void Database::extractDescrp(const cv::Mat &img, cv::Mat &ret) const
+{
+  //extract descriptors
+  cv::Ptr<cv::Feature2D> fdetector;
+  if (m_descriptor=="orb")        fdetector=cv::ORB::create();
+  else if (m_descriptor=="brisk") fdetector=cv::BRISK::create();
+#ifdef OPENCV_VERSION_3
+  else if (m_descriptor=="akaze") fdetector=cv::AKAZE::create();
+#endif
+#ifdef USE_CONTRIB
+  else if(m_descriptor=="surf" )  fdetector=cv::xfeatures2d::SURF::create(400, 4, 2, EXTENDED_SURF);
+#endif
+  else throw std::runtime_error("Invalid descriptor");
+
+  if (img.empty())
+    throw std::runtime_error("Image is empty");
+  std::vector<cv::KeyPoint> keypoints;
+  fdetector->detectAndCompute(img, cv::Mat(), keypoints, ret);
 }
 
 // ---------------------------------------------------------------------------

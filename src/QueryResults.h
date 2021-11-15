@@ -168,6 +168,9 @@ class QueryResults: public std::vector<Result>
 {
 public:
 
+  int getDbSize() const;
+
+  void setDbSize(int dbSize);
   /** 
    * Multiplies all the scores in the vector by factor
    * @param factor
@@ -187,6 +190,8 @@ public:
    */
   void saveM(const std::string &filename) const;
   
+private:
+  int dbSize_ = 0;
 };
 
 // --------------------------------------------------------------------------

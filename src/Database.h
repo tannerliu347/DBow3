@@ -25,6 +25,13 @@
 #include "FeatureVector.h"
 #include "exports.h"
 
+// OpenCv
+#include <opencv2/features2d/features2d.hpp>
+#ifdef USE_CONTRIB
+#include <opencv2/xfeatures2d/nonfree.hpp>
+#include <opencv2/xfeatures2d.hpp>
+#endif
+
 namespace DBoW3 {
 
 // For query functions
@@ -146,6 +153,18 @@ public:
    */
   EntryId add(const BowVector &vec, 
     const FeatureVector &fec = FeatureVector() );
+    
+  /**
+   * TL
+   * Adds a raw image to the database and return its index. 
+   * It extracts the features and calls the other add function
+   * @param img raw image
+   * @param bowvec if given
+   * @param fvec if given
+   * @return id of new entry
+   */
+  EntryId addImg(const cv::Mat &img,
+    BowVector *bowvec = NULL, FeatureVector *fvec = NULL);
 
   /**
    * Empties the database
@@ -201,6 +220,17 @@ public:
    *   < 0 means all
    */
   void query(const BowVector &vec, QueryResults &ret, 
+    int max_results = 1, int max_id = -1) const;
+
+  /**
+   * Queries the database with some features
+   * @param img raw image
+   * @param ret (out) query results
+   * @param max_results number of results to return. <= 0 means all
+   * @param max_id only entries with id <= max_id are returned in ret.
+   *   < 0 means all
+   */
+  void queryImg(const cv::Mat &img, QueryResults &ret,
     int max_results = 1, int max_id = -1) const;
 
   /**
@@ -277,6 +307,9 @@ protected:
   void queryDotProduct(const BowVector &vec, QueryResults &ret, 
     int max_results, int max_id) const;
 
+  /// Extract descriptors from an image
+  void extractDescrp(const cv::Mat &img, cv::Mat &ret) const;
+
 protected:
 
   /* Inverted file declaration */
@@ -344,6 +377,9 @@ protected:
   
   /// Number of valid entries in m_dfile
   int m_nentries;
+
+  /// Type of descriptor to use (only for addImg, queryImg)
+  std::string m_descriptor = "orb";
   
 };
 

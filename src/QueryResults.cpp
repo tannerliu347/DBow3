@@ -36,11 +36,25 @@ ostream & operator<<(ostream& os, const QueryResults& ret )
   QueryResults::const_iterator rit;
   for(rit = ret.begin(); rit != ret.end(); ++rit)
   {
+    if (ret.getDbSize() - rit->Id <= 5)
+      continue;
     os << *rit;
     if(rit + 1 != ret.end()) os << endl;
   }
   return os;
 }
+
+// ---------------------------------------------------------------------------
+
+int QueryResults::getDbSize() const {
+  return dbSize_;
+}
+
+void QueryResults::setDbSize(int dbSize) {
+  dbSize_ = dbSize;
+}
+
+// ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 

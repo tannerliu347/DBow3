@@ -128,7 +128,8 @@ void testDatabase(const  vector<cv::Mat > &features)
     cout << "Creating a small database..." << endl;
 
     // load the vocabulary from disk
-    Vocabulary voc("small_voc.yml.gz");
+    // Vocabulary voc("small_voc.yml.gz");
+    Vocabulary voc("/home/tannerliu/DBow3/orbvoc.dbow3");
 
     Database db(voc, false, 0); // false = do not use direct index
     // (so ignore the last param)
@@ -173,26 +174,68 @@ void testDatabase(const  vector<cv::Mat > &features)
 }
 
 
+void testImgDatabase(const vector<string>& imgPaths, int waitMilliSec = 100) {
+    // load vocab
+    Vocabulary voc("/home/tannerliu/DBow3/orbvoc.dbow3");
+    Database db(voc, false, 0);
+
+    // cout << "Adding to database" << endl;
+    // // add images to database
+    // for (size_t i = 0; i < imgPaths.size(); i++) {
+    //     cv::Mat img = cv::imread(imgPaths[i], 0);
+    //     db.addImg(img);
+    // }
+    // cout << "... done!" << endl;
+
+    cout << "Querying the databse: " << endl;
+    QueryResults ret;
+    for (size_t i = 0; i < imgPaths.size(); i++) {
+        cv::Mat img = cv::imread(imgPaths[i]);
+        db.queryImg(img, ret, 4);
+        db.addImg(img);
+        cout << "Searching for image: " << i << ". " << ret << endl;
+        cv::imshow("query frame", img);
+        cv::waitKey(waitMilliSec);
+    }
+    cout << "... done!" << endl;
+}
+
+
 // ----------------------------------------------------------------------------
 
 int main(int argc,char **argv)
 {
 
+    // try{
+    //     CmdLineParser cml(argc,argv);
+    //     if (cml["-h"] || argc<=2){
+    //         cerr<<"Usage:  descriptor_name     image0 image1 ... \n\t descriptors:brisk,surf,orb ,akaze(only if using opencv 3)"<<endl;
+    //          return -1;
+    //     }
+
+    //     string descriptor=argv[1];
+
+    //     auto images=readImagePaths(argc,argv,2);
+    //     vector<cv::Mat> features= loadFeatures(images,descriptor);
+    //     // testVocCreation(features);
+
+
+    //     testDatabase(features);
+
+    // }catch(std::exception &ex){
+    //     cerr<<ex.what()<<endl;
+    // }
+
+    // test of wrapper addImg, queryImg funcitons
     try{
         CmdLineParser cml(argc,argv);
         if (cml["-h"] || argc<=2){
-            cerr<<"Usage:  descriptor_name     image0 image1 ... \n\t descriptors:brisk,surf,orb ,akaze(only if using opencv 3)"<<endl;
+            cerr<<"Usage:  descriptor_name  image0 image1 ... \n\t descriptors:brisk,surf,orb ,akaze(only if using opencv 3)"<<endl;
              return -1;
         }
 
-        string descriptor=argv[1];
-
-        auto images=readImagePaths(argc,argv,2);
-        vector< cv::Mat   >   features= loadFeatures(images,descriptor);
-        testVocCreation(features);
-
-
-        testDatabase(features);
+        vector<string> images=readImagePaths(argc,argv,2);
+        testImgDatabase(images, 50);
 
     }catch(std::exception &ex){
         cerr<<ex.what()<<endl;
